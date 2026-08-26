@@ -7,6 +7,7 @@ CREATE TABLE tiers (
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
   username VARCHAR(255) UNIQUE NOT NULL,
+  api_key VARCHAR(255) UNIQUE NOT NULL,
   tier_id INT NOT NULL,
   FOREIGN KEY (tier_id) REFERENCES tiers(id)
 );
@@ -22,11 +23,6 @@ CREATE TABLE usage_logs (
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
-CREATE INDEX idx_usage_logs_user_id
-ON usage_logs(user_id);
-
-CREATE INDEX idx_usage_logs_endpoint
-ON usage_logs(endpoint);
-
-CREATE INDEX idx_usage_logs_timestamp
-ON usage_logs(timestamp);
+CREATE INDEX idx_usage_logs_user_id ON usage_logs(user_id);
+CREATE INDEX idx_usage_logs_endpoint ON usage_logs(endpoint);
+CREATE INDEX idx_usage_logs_timestamp ON usage_logs(timestamp);

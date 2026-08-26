@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    container_name: ratelock-redis
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: ratelock
+      POSTGRES_USER: ratelock
+      POSTGRES_PASSWORD: ratelock123
+    ports:
+      - "5432:5432"
+    container_name: ratelock-postgres
+    volumes:
+      - ./schemas/raw_schema.sql:/docker-entrypoint-initdb.d/init.sql
