@@ -7,7 +7,7 @@ conn = psycopg.connect(
     user="ratelock",
     password="ratelock123",
     host="localhost",
-    port="5432"
+    port="54321"
 )
 
 cursor = conn.cursor()
@@ -23,7 +23,7 @@ cursor.execute("""
     INSERT INTO tiers (name, tokens_per_hour) 
     VALUES (%s, %s)
     ON CONFLICT (name) DO NOTHING
-""", ("premium", 500))
+    """, ("premium", 500))
 
 conn.commit()
 
