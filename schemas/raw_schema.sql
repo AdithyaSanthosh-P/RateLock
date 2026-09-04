@@ -26,3 +26,17 @@ CREATE TABLE usage_logs (
 CREATE INDEX idx_usage_logs_user_id ON usage_logs(user_id);
 CREATE INDEX idx_usage_logs_endpoint ON usage_logs(endpoint);
 CREATE INDEX idx_usage_logs_timestamp ON usage_logs(timestamp);
+
+CREATE TABLE endpoint_costs (
+  endpoint VARCHAR(255) PRIMARY KEY,
+  base_token_cost INT NOT NULL DEFAULT 1,
+  token_cost INT NOT NULL DEFAULT 1,
+  expected_latency_ms FLOAT NOT NULL DEFAULT 50,
+  avg_latency_ms FLOAT,
+  sample_count INT DEFAULT 0,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- seed: company policy baseline per endpoint
+INSERT INTO endpoint_costs (endpoint, base_token_cost, token_cost, expected_latency_ms)
+VALUES ('endpoint-a', 1, 1, 20.0);
