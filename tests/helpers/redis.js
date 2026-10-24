@@ -30,3 +30,9 @@ export async function admit(keys, { cap = 10, rate = 0, cost = 1, ttl = 60000, d
         debt: parseFloat(r[4]),
     }
 }
+
+// Calls settle and turns the reply into numbers. -1 means that part of the script was skipped.
+export async function settle({ debtKey = '', bucketKey = '', debit = 0, debtCap = 50, decay = 0, credit = 0, cap = 10, rate = 0, ttl = 60000 } = {}) {
+    const r = await redis.settle(debtKey, bucketKey, debit, debtCap, decay, credit, cap, rate, ttl)
+    return { debt: parseFloat(r[0]), tokens: parseFloat(r[1]) }
+}

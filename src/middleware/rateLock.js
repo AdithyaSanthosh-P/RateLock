@@ -90,6 +90,9 @@ export function rateLock(endpointId) {
 
         if (!decision.allowed) {
             res.set('Retry-After', String(Math.ceil(decision.retryMs / 1000)))
+            if (decision.reason === 'contention_debt') {
+                res.set('RateLock-Reason', `contention-debit; amount=${decision.debt.toFixed(3)}`)
+            }
             res.status(429).json({ error: 'rate_limited', reason: decision.reason, retry_after_ms: decision.retryMs })
             logWriter.logRequest({
                 ...baseRow, tokens: 0, allowed: false, latency_ms: 0, status_code: 429,
