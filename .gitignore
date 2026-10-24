@@ -13,3 +13,6 @@ CLAUDE.md
 venv/
 experiments/keys.json
 experiments/results/
+experiments/bin/
+experiments/results_pilot/
+experiments/pilot.log
