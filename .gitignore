@@ -11,3 +11,5 @@ scripts/
 
 CLAUDE.md
 venv/
+experiments/keys.json
+experiments/results/
