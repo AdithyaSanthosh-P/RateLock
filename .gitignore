@@ -16,3 +16,6 @@ experiments/results/
 experiments/bin/
 experiments/results_pilot/
 experiments/pilot.log
+docs-personal/
+experiments/results_demo/
+__pycache__/

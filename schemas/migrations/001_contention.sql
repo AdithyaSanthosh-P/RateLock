@@ -1,19 +1,6 @@
 -- 001: contention-debit support (see docs/plan/contracts.md section 4).
--- Idempotent: safe to re-run against a database that already has parts of it.
-
-ALTER TABLE tiers ADD COLUMN IF NOT EXISTS burst integer;           -- bucket cap; NULL -> use tokens_per_hour
-
-ALTER TABLE endpoint_costs ADD COLUMN IF NOT EXISTS static_hold_ms numeric;   -- static baseline per endpoint
-ALTER TABLE endpoint_costs ADD COLUMN IF NOT EXISTS live_hold_ms   numeric;   -- last published B_e (for dashboards)
-
-ALTER TABLE usage_logs ADD COLUMN IF NOT EXISTS status_code   integer;
-ALTER TABLE usage_logs ADD COLUMN IF NOT EXISTS reason        text;          -- NULL | 'rate' | 'contention_debt' | 'acquire_timeout' | 'fail_open'
-ALTER TABLE usage_logs ADD COLUMN IF NOT EXISTS overhead_us   integer;       -- middleware entry -> admission decision
-ALTER TABLE usage_logs ADD COLUMN IF NOT EXISTS handler_ms    numeric;       -- admission decision -> response finish
-ALTER TABLE usage_logs ADD COLUMN IF NOT EXISTS cost          numeric;
-ALTER TABLE usage_logs ADD COLUMN IF NOT EXISTS debt_at_admit numeric;
-ALTER TABLE usage_logs ADD COLUMN IF NOT EXISTS policy        text;
-ALTER TABLE usage_logs ADD COLUMN IF NOT EXISTS run_id        text;
+-- Needs the columns that raw_schema.sql already creates in tiers, usage_logs and endpoint_costs
+-- (burst, static_hold_ms, status_code, run_id, ...). Safe to re-run.
 
 CREATE TABLE IF NOT EXISTS pool_holds (
   id            bigserial PRIMARY KEY,
