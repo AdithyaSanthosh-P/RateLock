@@ -3,7 +3,7 @@ import express from 'express'
 import { config } from '../config.js'
 import { redis } from '../db/redis.js'
 
-export function makeAdminRouter({ getPoolStats = () => null } = {}) {
+export function makeAdminRouter({ getPoolStats = () => null, getLive = () => null } = {}) {
     const router = express.Router()
 
     router.use((req, res, next) => {
@@ -26,6 +26,11 @@ export function makeAdminRouter({ getPoolStats = () => null } = {}) {
             pool: getPoolStats(),
             loadflag: await redis.get('ratelock:loadflag'),
         })
+    })
+
+    // Everything the live dashboard needs in one call: pool snapshot, settlement totals, new hold events.
+    router.get('/live', (req, res) => {
+        res.json(getLive(Number(req.query.since) || 0))
     })
 
     return router

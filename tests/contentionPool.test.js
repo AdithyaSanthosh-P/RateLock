@@ -220,3 +220,20 @@ test('T14: overstay with a zero baseline matches whole mode', async () => {
     }
     assert.equal(await run('holder_overstay'), await run('holder_whole'))
 })
+
+test('snapshot: shows holders, waiters and the imposed total so far, without changing the final accounting', async () => {
+    const env = makeEnv({ size: 1 })
+    const a = await env.acquire('A', 0)
+    env.acquire('W', 20)
+    await tick()
+    env.now = 60
+    const snap = env.pool.snapshot()
+    assert.equal(snap.holders.length, 1)
+    assert.equal(snap.holders[0].apiKey, 'A')
+    assert.equal(snap.holders[0].heldMs, 60)
+    assert.equal(snap.holders[0].imposedMs, 40)
+    assert.equal(snap.waiterCount, 1)
+    assert.equal(snap.waiters[0].waitedMs, 40)
+    env.release(a.holdId, 100)
+    assert.equal(env.holdFor('A').imposedMs, 80)
+})

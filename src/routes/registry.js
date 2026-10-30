@@ -1,5 +1,7 @@
 // Route registry: the only place endpoint IDs are defined (decision D1).
 // Table is in docs/plan/contracts.md section 6.
+import fs from 'node:fs'
+import { config } from '../config.js'
 import { makeDemoHandlers } from './demo.js'
 
 export function buildRegistry(db) {
@@ -11,5 +13,14 @@ export function buildRegistry(db) {
         { endpointId: 'demo.txn',    method: 'get',  path: '/demo/txn',     handler: h.txn },
         { endpointId: 'demo.hotrow', method: 'post', path: '/demo/hotrow',  handler: h.hotrow },
         { endpointId: 'demo.cpu',    method: 'get',  path: '/demo/cpu',     handler: h.cpu },
+        ...replayRoutes(h),
     ]
+}
+
+// Azure replay (D26): one endpoint per trace (app, func), so each gets its own baseline and cost.
+// IDs are replay.<n>, from experiments/azure/out/endpoints.json; off unless REPLAY_ENDPOINTS_FILE is set.
+function replayRoutes(h) {
+    if (!config.REPLAY_ENDPOINTS_FILE) return []
+    const endpoints = JSON.parse(fs.readFileSync(config.REPLAY_ENDPOINTS_FILE, 'utf8'))
+    return endpoints.map(e => ({ endpointId: e.endpointId, method: 'get', path: `/replay/${e.ep}`, handler: h.replay }))
 }

@@ -77,6 +77,14 @@ export function makeDemoHandlers(db) {
             res.json({ ok: true, v: r.rows[0].v })
         },
 
+        // Azure trace replay (D26): hold one pooled connection for the trace call's duration.
+        // Own cap (120 s), since trace holds can exceed MAX_PARAM; the schedule already caps them at run end.
+        replay: async (req, res) => {
+            const ms = Math.min(120000, Math.max(0, Number(req.query.ms) || 0))
+            await run(client => client.query('SELECT pg_sleep($1)', [ms / 1000]))
+            res.json({ ok: true, ms })
+        },
+
         // Synchronous busy loop: blocks the event loop, uses no DB.
         cpu: (req, res) => {
             const ms = param(req.query.ms, 50)

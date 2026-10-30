@@ -3,12 +3,12 @@ import { buildRegistry } from './routes/registry.js'
 import { makeAdminRouter } from './routes/admin.js'
 import { rateLock } from './middleware/rateLock.js'
 
-// db: { query, withClient } used by the demo routes. getPoolStats feeds /admin/stats.
-export function createApp({ db, getPoolStats }) {
+// db: { query, withClient } used by the demo routes. getPoolStats feeds /admin/stats, getLive feeds /admin/live.
+export function createApp({ db, getPoolStats, getLive }) {
     const app = express()
 
     app.get('/health', (req, res) => res.json({ ok: true }))
-    app.use('/admin', makeAdminRouter({ getPoolStats }))
+    app.use('/admin', makeAdminRouter({ getPoolStats, getLive }))
 
     for (const r of buildRegistry(db)) {
         app[r.method](r.path, rateLock(r.endpointId), r.handler)

@@ -7,6 +7,7 @@ import { ContentionPool } from './src/pool/contentionPool.js'
 import { logWriter } from './src/services/logWriter.js'
 import { makeBaselines } from './src/services/baselines.js'
 import { makeSettlement } from './src/services/settlement.js'
+import { telemetry } from './src/services/telemetry.js'
 import { loadEndpointCosts, startCostCalibrator } from './src/services/costCalibrator.js'
 
 async function main() {
@@ -28,24 +29,34 @@ async function main() {
         getContext: currentCtx,
         getBaselineMs: baselines.getBaselineMs,
         onSettle: settlement.onSettle,
-        onHold: hold => logWriter.logHold({
-            run_id: config.RL_RUN_ID,
-            policy: config.RL_POLICY,
-            api_key: hold.apiKey,
-            endpoint: hold.endpointId,
-            acquired_at: new Date(hold.acquiredAt).toISOString(),
-            hold_ms: hold.holdMs,
-            wait_ms: hold.waitMs,
-            imposed_ms: hold.imposedMs,
-            overstay_ms: hold.overstayMs,
-            baseline_ms: hold.baselineMs,
+        onHold: hold => {
             // nominal amounts (before the bucket and debt caps in settle.lua)
-            debit_tokens: settlement.debitTokens(hold.imposedMs),
-            credit_tokens: settlement.creditTokens(hold.waitMs, hold.admittedCost),
-        }),
+            const debit = settlement.debitTokens(hold.imposedMs)
+            const credit = settlement.creditTokens(hold.waitMs, hold.admittedCost)
+            logWriter.logHold({
+                run_id: config.RL_RUN_ID,
+                policy: config.RL_POLICY,
+                api_key: hold.apiKey,
+                endpoint: hold.endpointId,
+                acquired_at: new Date(hold.acquiredAt).toISOString(),
+                hold_ms: hold.holdMs,
+                wait_ms: hold.waitMs,
+                imposed_ms: hold.imposedMs,
+                overstay_ms: hold.overstayMs,
+                baseline_ms: hold.baselineMs,
+                debit_tokens: debit,
+                credit_tokens: credit,
+            })
+            telemetry.pushHold({ ...hold, debit, credit })
+        },
     })
 
-    const app = createApp({ db: contentionPool, getPoolStats: () => contentionPool.stats() })
+    const getLive = since => ({
+        pool: contentionPool.snapshot(),
+        settlement: settlement.stats(),
+        ...telemetry.since(since),
+    })
+    const app = createApp({ db: contentionPool, getPoolStats: () => contentionPool.stats(), getLive })
     const server = app.listen(config.PORT, () => {
         console.log(`RateLock on http://localhost:${config.PORT} (policy=${config.RL_POLICY}, run=${config.RL_RUN_ID}, pool=${config.APP_POOL_SIZE})`)
     })

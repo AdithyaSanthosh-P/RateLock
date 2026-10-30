@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RateLock Live</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <div class="logo" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div>
+      <h1>RateLock</h1>
+      <p>Contention-aware rate limiting</p>
+    </div>
+  </div>
+  <div id="status" class="status"><span class="dot"></span><span id="statusText">Connecting</span></div>
+</header>
+
+<nav class="scenes" aria-label="Demo scenes">
+  <button class="scene" data-scene="1">
+    <span class="n">1</span>
+    <span><b>The noisy neighbour</b><em>No contention awareness. One greedy key hogs the pool and everyone suffers.</em></span>
+  </button>
+  <button class="scene" data-scene="2">
+    <span class="n">2</span>
+    <span><b>The fix</b><em>Same traffic. The culprit is charged for the waiting it causes.</em></span>
+  </button>
+  <button class="scene" data-scene="3">
+    <span class="n">3</span>
+    <span><b>Fairness</b><em>A key that is legitimately slow is left alone. No false accusations.</em></span>
+  </button>
+</nav>
+
+<div class="toolbar">
+  <div class="tb-group"><span class="tb-label">Policy</span><div id="policies" class="seg"></div></div>
+  <div class="tb-group" title="1 key, 8 requests per second"><span class="tb-label">Culprit</span>
+    <div class="seg" id="tCulprit"><button data-v="off">off</button><button data-v="normal">normal</button><button data-v="hog">hog</button></div></div>
+  <div class="tb-group" title="20 keys, 100 requests per second in total"><span class="tb-label">Victims</span>
+    <div class="seg" id="tVictims"><button data-v="true">on</button><button data-v="false">off</button></div></div>
+  <div class="tb-group" title="1 key, 4.8 requests per second, 2 s queries"><span class="tb-label">Slow key</span>
+    <div class="seg" id="tSlow"><button data-v="true">on</button><button data-v="false">off</button></div></div>
+  <button id="reset" class="ghost">Reset tokens and debt</button>
+</div>
+<p id="policyText" class="policy-text"></p>
+
+<main class="stage">
+  <section class="pool" aria-label="Connection pool">
+    <div class="sec-head"><h2>Waiting</h2><span class="sub">first in line is on the left</span></div>
+    <div id="queue" class="queue"></div>
+    <div class="flow" aria-hidden="true"><span></span></div>
+    <div class="sec-head"><h2>Database connections</h2><span class="sub" id="poolHint"></span></div>
+    <div id="slots" class="slots"></div>
+    <div class="legend">
+      <span><i class="sw c-victim"></i>victim</span>
+      <span><i class="sw c-culprit"></i>culprit</span>
+      <span><i class="sw c-slow"></i>slow key</span>
+      <span><i class="sw over"></i>holding longer than its endpoint normally does</span>
+    </div>
+    <p id="story" class="story"></p>
+  </section>
+
+  <aside class="readings" aria-label="Readings">
+    <div class="hero-fig">
+      <span class="cap">Victim p99 latency</span>
+      <b id="kP99">-</b>
+      <span class="cap">worst of the last 3 s</span>
+    </div>
+    <dl class="figs">
+      <div><dt>Victims refused</dt><dd><b id="kVRef">-</b></dd></div>
+      <div><dt>Culprit blocked per second</dt><dd><b id="kCBlk">-</b></dd></div>
+      <div><dt>Connections in use</dt><dd><b id="kPool">-</b></dd></div>
+      <div><dt>Requests waiting</dt><dd><b id="kQueue">-</b></dd></div>
+      <div><dt>Tokens debited since start</dt><dd><b id="kDebit">-</b></dd></div>
+    </dl>
+    <div class="sec-head"><h2>Tokens and debt</h2><span class="sub">burst 20, refill 10 per second</span></div>
+    <div id="gauges" class="gauges"></div>
+  </aside>
+</main>
+
+<section class="trends" aria-label="Trends">
+  <figure><figcaption>Latency seen by clients <span class="sub">log scale</span></figcaption><canvas id="chLat"></canvas></figure>
+  <figure><figcaption>Requests per second</figcaption><canvas id="chRps"></canvas></figure>
+  <figure><figcaption>Culprit tokens and debt</figcaption><canvas id="chDebt"></canvas></figure>
+</section>
+
+<section class="detail">
+  <div>
+    <div class="sec-head"><h2>How the debit is worked out</h2></div>
+    <div id="ledger" class="ledger"></div>
+  </div>
+  <div>
+    <div class="sec-head"><h2>Recent events</h2><span class="sub">holds that caused or suffered real waiting</span></div>
+    <div id="feed"></div>
+  </div>
+</section>
+
+<script src="app.js"></script>
+</body>
+</html>

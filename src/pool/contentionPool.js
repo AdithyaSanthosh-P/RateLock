@@ -266,6 +266,32 @@ export class ContentionPool {
     stats() {
         return { size: this.size, holders: this.holders.size, waiters: this.waiters.length }
     }
+
+    // Read-only view for the live dashboard. advance() is exact at any moment, so calling it here only
+    // refreshes the imposed totals; it never changes what a later release computes.
+    snapshot(maxWaiters = 100) {
+        const now = this.clock()
+        this.advance(now)
+        return {
+            size: this.size,
+            policy: this.policy,
+            gamma: this.gamma,
+            holders: [...this.holders.values()].map(h => ({
+                id: h.holdId,
+                apiKey: h.ctx.apiKey,
+                endpointId: h.ctx.endpointId,
+                heldMs: now - h.acquireT,
+                overstayAfterMs: this.gamma * h.baselineMs,
+                imposedMs: h.imposedMs,
+            })),
+            waiterCount: this.waiters.length,
+            waiters: this.waiters.slice(0, maxWaiters).map(w => ({
+                apiKey: w.ctx.apiKey,
+                endpointId: w.ctx.endpointId,
+                waitedMs: now - w.enqT,
+            })),
+        }
+    }
 }
 
 // SQL errors (constraint violations, syntax errors) carry a `severity` from the server and leave the

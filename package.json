@@ -8,7 +8,8 @@
     "start": "node index.js",
     "dev": "node --watch index.js",
     "test": "node --test tests/*.test.js",
-    "migrate": "node scripts-db/migrate.js"
+    "migrate": "node scripts-db/migrate.js",
+    "dashboard": "node dashboard/server.js"
   },
   "author": "",
   "license": "ISC",

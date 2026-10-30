@@ -19,3 +19,5 @@ experiments/pilot.log
 docs-personal/
 experiments/results_demo/
 __pycache__/
+experiments/azure/data/
+experiments/azure/out/

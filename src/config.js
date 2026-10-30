@@ -61,6 +61,8 @@ export const config = Object.freeze({
     RL_CALIBRATOR_INTERVAL_SEC: num('RL_CALIBRATOR_INTERVAL_SEC', 15, { min: 1 }),
     RL_RUN_ID: str('RL_RUN_ID', 'dev'),
     LOG_BATCH_MS: num('LOG_BATCH_MS', 500, { min: 10 }),
+    // Azure trace replay (D26): JSON list of replay endpoints written by experiments/azure/prepare.py. Empty = off.
+    REPLAY_ENDPOINTS_FILE: str('REPLAY_ENDPOINTS_FILE', ''),
 
     // contracts.md says "required"; a dev default keeps `npm run dev` and the acceptance checks simple.
     ADMIN_TOKEN: str('ADMIN_TOKEN', 'dev-admin-token'),
